@@ -5,6 +5,7 @@ import matplotlib.pyplot as plt
 from scipy.interpolate import interp1d
 import pandas as pd
 from io import BytesIO
+from datetime import datetime
 
 st.set_page_config(page_title="Lipid Orientation Analyzer for CH3 similarity", layout="wide")
 st.title("Lipid Chain Orientation Analyzer")
@@ -161,9 +162,17 @@ if st.button("GENERATE PLOT & DOWNLOAD EXCEL", type="primary", use_container_wid
         st.pyplot(fig)
         plt.close(fig)
 
-        df = pd.DataFrame(results)
+        df = pd.DataFrame(results)  
         output = BytesIO()
-        df.to_excel(output, index=False)
+        with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
+             df.to_excel(writer, sheet_name='Results', startrow=6, index=False)
+# 2. Access the worksheet object
+             worksheet = writer.sheets['Results']
+             now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+             worksheet.write(0,0,"Project Name: Lipid Orientation Analysis")
+             worksheet.write(1,0,"Operator: Immanuel Staines J")
+             worksheet.write(2,0,f"Timestamp: {now}")
+             worksheet.write(3,0,"Reference: JPC B (Pandey et al.)")
         output.seek(0)
 
         st.download_button(
